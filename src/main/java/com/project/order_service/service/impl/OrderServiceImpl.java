@@ -87,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void softDeleteById(UUID id) {
+    public void softDeleteOrderById(UUID id) {
         var order = findOrderOrThrow(id);
         order.setDeleted(true);
     }

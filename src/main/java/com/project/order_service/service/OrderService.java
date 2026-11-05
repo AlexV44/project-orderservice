@@ -18,6 +18,6 @@ public interface OrderService {
     Page<OrderDetailedResponse> getFilteredOrders(List<OrderStatus> statuses, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     List<OrderDetailedResponse> getOrdersByUserId(UUID userId);
     OrderDetailedResponse updateOrderById(UUID id, OrderUpdateRequest request);
-    void softDeleteById(UUID id);
+    void softDeleteOrderById(UUID id);
     void deleteOrderById(UUID id);
 }
