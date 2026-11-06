@@ -11,6 +11,7 @@ import com.project.order_service.entity.enums.OrderStatus;
 import com.project.order_service.exception.notfound.OrderNotFoundException;
 import com.project.order_service.repository.OrderRepository;
 import com.project.order_service.service.OrderService;
+import com.project.order_service.service.impl.OrderServiceImpl;
 import com.project.order_service.service.mapper.OrderMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +39,7 @@ public class OrderServiceImplTest {
     private UserClient userClient;
 
     @InjectMocks
-    private OrderService orderService;
+    private OrderServiceImpl orderService;
 
     @Test
     void createOrder_Success() {
