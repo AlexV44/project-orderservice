@@ -3,7 +3,7 @@
 --changeset alexv44:001_create_orders_table
 
 CREATE TABLE orders (
-    id UUID PRIMARY KEY,
+    id UUID,
     user_id UUID NOT NULL,
     status VARCHAR(30) NOT NULL,
     total_price DECIMAL(19, 2) NOT NULL,

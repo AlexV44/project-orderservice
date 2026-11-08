@@ -20,7 +20,7 @@ import java.util.UUID;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "order")
+@Table(name = "orders")
 public class Order extends BaseAuditEntity {
     @Id
     @GeneratedValue

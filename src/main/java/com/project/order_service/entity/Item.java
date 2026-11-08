@@ -17,7 +17,7 @@ import java.util.UUID;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "item")
+@Table(name = "items")
 public class Item extends BaseAuditEntity {
 
     @Id

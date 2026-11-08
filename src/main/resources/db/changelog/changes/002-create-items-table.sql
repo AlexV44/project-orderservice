@@ -3,7 +3,7 @@
 --changeset alexv44:002_create_items_table
 
 CREATE TABLE items (
-    id UUID PRIMARY KEY,
+    id UUID,
     name VARCHAR(255) NOT NULL,
     price DECIMAL(19, 2) NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,

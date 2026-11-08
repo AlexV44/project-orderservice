@@ -6,8 +6,7 @@ spring:
     name: order-service
 
   datasource:
-    # Используем переменные среды с дефолтными значениями на случай локального запуска без .env
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/order_db}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/orderservice_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -23,7 +22,7 @@ spring:
 
   liquibase:
     enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
 app:
   services:
