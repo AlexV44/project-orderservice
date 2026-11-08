@@ -4,9 +4,12 @@ import com.project.order_service.client.UserClient;
 import com.project.order_service.dto.request.OrderCreateRequest;
 import com.project.order_service.dto.request.OrderUpdateRequest;
 import com.project.order_service.dto.response.OrderDetailedResponse;
+import com.project.order_service.entity.Item;
 import com.project.order_service.entity.Order;
 import com.project.order_service.entity.enums.OrderStatus;
+import com.project.order_service.exception.notfound.ItemNotFoundException;
 import com.project.order_service.exception.notfound.OrderNotFoundException;
+import com.project.order_service.repository.ItemRepository;
 import com.project.order_service.repository.OrderRepository;
 import com.project.order_service.repository.specification.OrderSpecification;
 import com.project.order_service.service.OrderService;
@@ -18,9 +21,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +36,7 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final ItemRepository itemRepository;
     private final OrderMapper orderMapper;
     private final UserClient userClient;
 
@@ -41,12 +50,31 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDetailedResponse createOrder(OrderCreateRequest request) {
+        Map<UUID, Item> itemsById = itemRepository.findAllById(
+                        request.items().stream().map(item -> item.itemId()).toList()
+                ).stream()
+                .collect(Collectors.toMap(Item::getId, Function.identity()));
+
+        BigDecimal totalPrice = request.items().stream()
+                .map(requestItem -> {
+                    Item item = itemsById.get(requestItem.itemId());
+                    if (item == null) {
+                        throw new ItemNotFoundException(requestItem.itemId());
+                    }
+                    return item.getPrice().multiply(BigDecimal.valueOf(requestItem.quantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         var order = orderMapper.toEntity(request);
 
         if (order.getItems() != null) {
-            order.getItems().forEach(item -> item.setOrder(order));
+            order.getItems().forEach(orderItem -> {
+                orderItem.setItem(itemsById.get(orderItem.getItem().getId()));
+                orderItem.setOrder(order);
+            });
         }
 
+        order.setTotalPrice(totalPrice);
         order.setStatus(OrderStatus.PENDING);
 
         var savedOrder = orderRepository.save(order);

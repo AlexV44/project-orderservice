@@ -28,8 +28,10 @@ public interface OrderMapper {
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "userId", ignore = true)
     void updateOrderFromDto(OrderUpdateRequest request, @MappingTarget Order order);
 
+    @Mapping(target = "id", source = "order.id")
     @Mapping(target = "user", source = "userDto")
     OrderDetailedResponse toDetailedDto(Order order, UserResponse userDto);
 }
