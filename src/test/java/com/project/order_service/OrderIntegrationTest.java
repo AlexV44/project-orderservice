@@ -4,6 +4,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.project.order_service.dto.request.OrderCreateRequest;
 import com.project.order_service.dto.request.OrderItemRequest;
+import com.project.order_service.entity.Item;
+import com.project.order_service.repository.ItemRepository;
 import com.project.order_service.repository.OrderRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +25,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,9 +69,13 @@ class OrderIntegrationTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private ItemRepository itemRepository;
+
     @BeforeEach
     void setUp() {
         orderRepository.deleteAll();
+        itemRepository.deleteAll();
         wireMockServer.resetAll();
     }
 
@@ -76,7 +83,11 @@ class OrderIntegrationTest {
     @DisplayName("Успешное создание заказа с обогащением данных пользователя через OpenFeign и сохранением в БД")
     void createOrder_IntegrationSuccess() throws Exception {
         UUID userId = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
+        Item item = itemRepository.save(Item.builder()
+            .name("Test product")
+            .price(new BigDecimal("12.50"))
+            .build());
+        UUID productId = item.getId();
 
         wireMockServer.stubFor(get(urlEqualTo("/api/users/" + userId))
                 .willReturn(aResponse()
@@ -98,13 +109,16 @@ class OrderIntegrationTest {
         mockMvc.perform(post("/api/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+            .andDo(result -> wireMockServer.verify(1, getRequestedFor(urlEqualTo("/api/users/" + userId))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.status").value("PENDING"))
-                .andExpect(jsonPath("$.userResponse.id").value(userId.toString()))
-                .andExpect(jsonPath("$.userResponse.email").value("alex.vidilin@system.local"))
-                .andExpect(jsonPath("$.userResponse.name").value("Алексей"))
-                .andExpect(jsonPath("$.userResponse.surname").value("Видилин"));
+                .andExpect(jsonPath("$.user.id").value(userId.toString()))
+                .andExpect(jsonPath("$.user.email").value("alex.vidilin@system.local"))
+                .andExpect(jsonPath("$.user.name").value("Алексей"))
+                .andExpect(jsonPath("$.user.surname").value("Видилин"))
+                .andExpect(jsonPath("$.totalPrice").value(25.0))
+                .andExpect(jsonPath("$.items[0].itemId").value(productId.toString()));
 
         org.assertj.core.api.Assertions.assertThat(orderRepository.findAll()).hasSize(1);
     }

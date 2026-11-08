@@ -3,12 +3,15 @@ package com.project.order_service;
 import com.project.order_service.client.UserClient;
 import com.project.order_service.dto.request.OrderCreateRequest;
 import com.project.order_service.dto.request.OrderUpdateRequest;
+import com.project.order_service.dto.request.OrderItemRequest;
 import com.project.order_service.dto.response.OrderDetailedResponse;
 import com.project.order_service.dto.response.UserResponse;
+import com.project.order_service.entity.Item;
 import com.project.order_service.entity.Order;
 import com.project.order_service.entity.OrderItem;
 import com.project.order_service.entity.enums.OrderStatus;
 import com.project.order_service.exception.notfound.OrderNotFoundException;
+import com.project.order_service.repository.ItemRepository;
 import com.project.order_service.repository.OrderRepository;
 import com.project.order_service.service.OrderService;
 import com.project.order_service.service.impl.OrderServiceImpl;
@@ -19,6 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +39,8 @@ public class OrderServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
     @Mock
+    private ItemRepository itemRepository;
+    @Mock
     private OrderMapper orderMapper;
     @Mock
     private UserClient userClient;
@@ -44,16 +51,27 @@ public class OrderServiceImplTest {
     @Test
     void createOrder_Success() {
         UUID userId = UUID.randomUUID();
-        OrderCreateRequest request = mock(OrderCreateRequest.class);
+        UUID itemId = UUID.randomUUID();
+        OrderCreateRequest request = new OrderCreateRequest(
+            userId,
+            List.of(new OrderItemRequest(itemId, 2))
+        );
 
         Order order = new Order();
         order.setUserId(userId);
+        Item storedItem = new Item();
+        storedItem.setId(itemId);
+        storedItem.setPrice(new BigDecimal("3.00"));
         OrderItem item = new OrderItem();
-        order.setItems(List.of(item));
+        Item itemReference = new Item();
+        itemReference.setId(itemId);
+        item.setItem(itemReference);
+        order.setItems(new ArrayList<>(List.of(item)));
 
         UserResponse userResponse = new UserResponse(userId, "test@mail.com", "John", "Doe");
         OrderDetailedResponse expectedResponse = mock(OrderDetailedResponse.class);
 
+        when(itemRepository.findAllById(List.of(itemId))).thenReturn(List.of(storedItem));
         when(orderMapper.toEntity(request)).thenReturn(order);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(userClient.getUserById(userId)).thenReturn(userResponse);
@@ -63,8 +81,11 @@ public class OrderServiceImplTest {
 
         assertThat(actualResponse).isEqualTo(expectedResponse);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(order.getTotalPrice()).isEqualByComparingTo("6.00");
         assertThat(item.getOrder()).isEqualTo(order);
+        assertThat(item.getItem()).isSameAs(storedItem);
 
+        verify(itemRepository).findAllById(List.of(itemId));
         verify(orderRepository).save(order);
         verify(userClient).getUserById(userId);
     }
