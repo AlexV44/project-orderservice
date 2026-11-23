@@ -14,6 +14,6 @@ import java.util.UUID;
 )
 public interface UserClient {
 
-    @GetMapping("/api/users/{id}")
+    @GetMapping("/api/v1/users/{id}")
     UserResponse getUserById(@PathVariable("id") UUID userId);
 }
