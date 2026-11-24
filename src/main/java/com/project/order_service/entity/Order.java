@@ -4,9 +4,14 @@ import com.project.order_service.entity.audit.BaseAuditEntity;
 import com.project.order_service.entity.enums.OrderStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import liquibase.license.User;
-import lombok.*;
+
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
@@ -21,6 +26,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "orders")
+@SQLRestriction("deleted = false")
 public class Order extends BaseAuditEntity {
     @Id
     @GeneratedValue

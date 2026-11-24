@@ -8,5 +8,5 @@
     <include file="db/changelog/changes/001-create-orders-table.sql"/>
     <include file="db/changelog/changes/002-create-items-table.sql"/>
     <include file="db/changelog/changes/003-create-order-items-table.sql"/>
-
+    <include file="db/changelog/changes/004-add-audit-to-order-items.sql"/>
 </databaseChangeLog>

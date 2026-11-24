@@ -13,7 +13,6 @@ import com.project.order_service.entity.enums.OrderStatus;
 import com.project.order_service.exception.notfound.OrderNotFoundException;
 import com.project.order_service.repository.ItemRepository;
 import com.project.order_service.repository.OrderRepository;
-import com.project.order_service.service.OrderService;
 import com.project.order_service.service.impl.OrderServiceImpl;
 import com.project.order_service.service.mapper.OrderMapper;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -169,6 +173,38 @@ public class OrderServiceImplTest {
         assertThat(actualResponse).isEqualTo(expectedResponse);
         verify(orderMapper).updateOrderFromDto(request, order);
         verify(userClient).getUserById(userId);
+    }
+
+    @Test
+    void getFilteredOrders_Success() {
+        UUID userId = UUID.randomUUID();
+        Order order = new Order();
+        order.setUserId(userId);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        UserResponse userResponse = new UserResponse(userId, "test@mail.com", "John", "Doe");
+        OrderDetailedResponse expected = mock(OrderDetailedResponse.class);
+
+        when(orderRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(order), pageable, 1));
+        when(userClient.getUserById(userId)).thenReturn(userResponse);
+        when(orderMapper.toDetailedDto(order, userResponse)).thenReturn(expected);
+
+        Page<OrderDetailedResponse> result = orderService.getFilteredOrders(
+                List.of(OrderStatus.PENDING), null, null, pageable);
+
+        assertThat(result.getContent()).containsExactly(expected);
+        verify(orderRepository).findAll(any(Specification.class), eq(pageable));
+        verify(userClient).getUserById(userId);
+    }
+
+    @Test
+    void getFilteredOrders_EmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(orderRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(Page.empty());
+
+        assertThat(orderService.getFilteredOrders(null, null, null, pageable)).isEmpty();
+        verifyNoInteractions(userClient);
     }
 
     @Test

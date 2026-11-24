@@ -5,5 +5,6 @@ import java.util.UUID;
 public record OrderItemResponse (
         UUID id,
         UUID itemId,
+        ItemResponse item,
         Integer quantity
 ) {}

@@ -85,6 +85,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderDetailedResponse> getOrdersByUserEmail(String email) {
+        var user = userClient.getUserByEmail(email);
+        return orderRepository.getByUserId(user.id()).stream()
+                .map(order -> orderMapper.toDetailedDto(order, user))
+                .toList();
+    }
+
+    @Override
     public Page<OrderDetailedResponse> getFilteredOrders(List<OrderStatus> statuses, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         var spec = Specification.where(OrderSpecification.hasStatus(statuses).and(OrderSpecification.createdBetween(startDate, endDate)));
         Page<Order> ordersPage = orderRepository.findAll(spec, pageable);
@@ -98,10 +106,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDetailedResponse> getOrdersByUserId(UUID userId) {
         List<Order> orders = orderRepository.getByUserId(userId);
-        return orders.stream().map(order -> {
-            var userResponse = userClient.getUserById(order.getUserId());
-            return orderMapper.toDetailedDto(order, userResponse);
-        }).toList();
+        if (orders.isEmpty()) {
+            return List.of();
+        }
+        var userResponse = userClient.getUserById(userId);
+        return orders.stream()
+                .map(order -> orderMapper.toDetailedDto(order, userResponse))
+                .toList();
     }
 
     @Override

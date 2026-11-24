@@ -1,8 +1,10 @@
 package com.project.order_service.entity;
 
+import com.project.order_service.entity.audit.BaseAuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
@@ -10,11 +12,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "order_items")
-public class OrderItem {
+public class OrderItem extends BaseAuditEntity {
 
     @Id
     @GeneratedValue
