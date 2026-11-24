@@ -3,7 +3,6 @@ package com.project.order_service.service.mapper;
 import com.project.order_service.dto.request.OrderItemRequest;
 import com.project.order_service.dto.response.OrderItemResponse;
 import com.project.order_service.entity.OrderItem;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

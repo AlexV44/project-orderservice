@@ -2,8 +2,8 @@ package com.project.order_service;
 
 import com.project.order_service.client.UserClient;
 import com.project.order_service.dto.request.OrderCreateRequest;
-import com.project.order_service.dto.request.OrderUpdateRequest;
 import com.project.order_service.dto.request.OrderItemRequest;
+import com.project.order_service.dto.request.OrderUpdateRequest;
 import com.project.order_service.dto.response.OrderDetailedResponse;
 import com.project.order_service.dto.response.UserResponse;
 import com.project.order_service.entity.Item;
@@ -35,7 +35,13 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceImplTest {

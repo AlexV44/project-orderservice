@@ -6,8 +6,12 @@ import com.project.order_service.dto.response.OrderDetailedResponse;
 import com.project.order_service.dto.response.OrderResponse;
 import com.project.order_service.dto.response.UserResponse;
 import com.project.order_service.entity.Order;
-
-import org.mapstruct.*;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
         uses = {OrderItemMapper.class}
