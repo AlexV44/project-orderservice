@@ -3,9 +3,11 @@ package com.project.order_service.client;
 import com.project.order_service.dto.response.UserResponse;
 import feign.FeignException;
 import org.springframework.cloud.openfeign.FallbackFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Component
 public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
     @Override
     public UserClient create(Throwable cause) {
